@@ -1,7 +1,7 @@
-displayName: Waeb
+displayName: Waeb2
 type: middleware
 
-import: github.com/tomMoulard/traefik-plugin-waeb
+import: github.com/Miromani4/traefik-plugin-waeb2
 
 summary: 'A web server inside Traefik'
 

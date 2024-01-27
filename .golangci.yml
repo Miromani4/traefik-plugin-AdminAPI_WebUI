@@ -25,5 +25,5 @@ linters-settings:
       main:
         allow:
           - $gostd
-          - github.com/tomMoulard/traefik-plugin-waeb
+          - github.com/Miromani4/traefik-plugin-waeb2
 
