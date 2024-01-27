@@ -1,4 +1,4 @@
-package traefik_plugin_waeb_test
+package traefik_plugin_waeb_test2
 
 import (
 	"context"
