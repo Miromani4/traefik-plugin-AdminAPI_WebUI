@@ -1,4 +1,4 @@
-# Waeb
+# Waeb2
 
 [![Build Status](https://github.com/tomMoulard/traefik-plugin-waeb/actions/workflows/main.yml/badge.svg)](https://github.com/tomMoulard/traefik-plugin-waeb/actions/workflows/main.yml)
 
