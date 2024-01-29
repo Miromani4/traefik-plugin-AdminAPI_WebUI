@@ -17,4 +17,4 @@ services:
     labels:
       traefik.http.routers.waeb.rule: Host(`waeb.localhost`)
       traefik.http.routers.waeb.middlewares: waeb2
-      traefik.http.middlewares.waeb.plugin.traefik-plugin-waeb.root: .
+      traefik.http.middlewares.waeb2.plugin.traefik-plugin-waeb2.root: .

@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	waeb "github.com/Miromani4/traefik-plugin-waeb2"
 )
 
 func TestWaeb(t *testing.T) {
