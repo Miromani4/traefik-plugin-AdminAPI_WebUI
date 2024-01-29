@@ -1,4 +1,4 @@
-// Package waeb builds a middleware that works like a web server
+// Upload config files
 package traefik_plugin_waeb2
 
 import (
