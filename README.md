@@ -1,18 +1,8 @@
-# Waeb2
+# AdminAPI_WebUI
 
-[![Build Status](https://github.com/tomMoulard/traefik-plugin-waeb/actions/workflows/main.yml/badge.svg)](https://github.com/tomMoulard/traefik-plugin-waeb/actions/workflows/main.yml)
+add Admin API & Web UI for Traefik configured dynamic files!
 
-Make Traefik a web server !
-
-This is a plugin for [Traefik](https://traefik.io) to build a **web server** as a middleware.
-
-> Not the plugin we deserved, but the plugin we needed.
-> 
-> ~ [@mpl](https://github.com/mpl) ([src](https://twitter.com/lejatorn/status/1661750793232617477))
-
-> Just because you can, doesn't mean you should
-> 
-> ~ [@dtomcej](https://github.com/dtomcej) ([src](https://twitter.com/daniel_tomcej/status/1661746210485723136))
+This is a plugin for [Traefik](https://traefik.io) to add a **Admin API & Web UI for Traefik** as a middleware.
 
 ## Usage
 
@@ -27,21 +17,21 @@ YAML), where the interesting part is the `http.middlewares` section:
 http:
   routers:
     my-waeb-router:
-      rule: host(`waeb.localhost`)
+      rule: host(`admin.localhost`)
       service: noop@internal # required
       middlewares:
-        - traefik-plugin-waeb2
+        - traefik_plugin_AdminAPI_WebUI
 
   middlewares:
-    traefik-plugin-waeb2:
+    traefik_plugin_AdminAPI_WebUI:
       plugin:
-        traefik-plugin-waeb2:
-          root: "/var/www/html/"
+        traefik_plugin_AdminAPI_WebUI:
+          root: "/tmp/"
 ```
 
 #### `root`
 
-The `root` parameter is the root directory of the web server.
+The `root` parameter is the root directory of dynamic configuration files.
 
 ### Local test
 
