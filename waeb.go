@@ -1,5 +1,5 @@
 // Upload config files
-package traefik-plugin-AdminAPI_WebUI
+package traefik_plugin_AdminAPI_WebUI
 
 import (
 	"archive/zip"
@@ -174,10 +174,7 @@ func unzip() {
 
 		dstFile.Close()
 		fileInArchive.Close()
-		e := os.Remove(html_root + "web_panel.zip")
-		if e != nil {
-			log.Fatal(e)
-		}
+
 	}
 }
 

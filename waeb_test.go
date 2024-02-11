@@ -1,4 +1,4 @@
-package traefik-plugin-AdminAPI_WebUI_test2
+package traefik_plugin_AdminAPI_WebUI_test2
 
 import (
 	"context"
