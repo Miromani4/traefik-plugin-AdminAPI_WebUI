@@ -4,13 +4,25 @@
 <body>
 <form method="post" enctype="multipart/form-data">
   <div>
-    <label for="file">Choose file to upload</label>
-    <input type="file" id="file" name="file" multiple />
+    <input id="fileupload" type="file" name="fileupload" />
+    <input type="button" id="upload-button" onclick="uploadFile()" value="upload"> 
   </div>
   <div>
-    <button>Submit</button>
+
   </div>
 </form>
 
+<script>
+  async function uploadFile() {
+      let formData = new FormData();
+      formData.append("atr", "upload")           
+      formData.append("file", fileupload.files[0]);
+      await fetch('/api', {
+        method: "POST", 
+        body: formData
+      });    
+      //alert('The file has been uploaded successfully.');
+  }
+  </script>
 </body>
 </html>
