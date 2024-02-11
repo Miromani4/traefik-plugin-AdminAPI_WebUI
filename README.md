@@ -41,5 +41,5 @@ There is a `docker-compose.yml` file to test the plugin locally:
 docker-compose up -d
 ```
 
-Then, you can go to [http://waeb.localhost](http://waeb.localhost) to see the
+Then, you can go to [http://admin.localhost](http://admin.localhost) to see the
 result.
