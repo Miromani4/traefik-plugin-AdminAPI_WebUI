@@ -1,11 +1,11 @@
-displayName: Waeb2
+displayName: AdminAPI_WebUI
 type: middleware
 
-import: github.com/Miromani4/traefik-plugin-waeb2
+import: github.com/Miromani4/traefik-plugin-AdminAPI_WebUI
 
 summary: 'A web server inside Traefik'
 
 iconPath: ./docs/img/logo.png
 
 testData:
-  root: /var/www/html/
+  root: /admin_panel/html/

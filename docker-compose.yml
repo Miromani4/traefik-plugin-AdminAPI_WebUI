@@ -7,14 +7,14 @@ services:
       - --api.insecure=true
       - --providers.docker
       - --log.level=ERROR
-      - --experimental.localPlugins.traefik-plugin-waeb2.modulename=github.com/Miromani4/traefik-plugin-waeb2
+      - --experimental.localPlugins.traefik-plugin-AdminAPI_WebUI.modulename=github.com/Miromani4/traefik-plugin-waeb2
     ports:
       - 80:80
       - 8080:8080
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./:/plugins-local/src/github.com/Miromani4/traefik-plugin-waeb2
+      - ./:/plugins-local/src/github.com/Miromani4/traefik-plugin-AdminAPI_WebUI
     labels:
       traefik.http.routers.waeb.rule: Host(`waeb.localhost`)
-      traefik.http.routers.waeb.middlewares: waeb2
-      traefik.http.middlewares.waeb2.plugin.traefik-plugin-waeb2.root: .
+      traefik.http.routers.waeb.middlewares: AdminAPI_WebUI
+      traefik.http.middlewares.waeb2.plugin.traefik-plugin-AdminAPI_WebUI.root: .

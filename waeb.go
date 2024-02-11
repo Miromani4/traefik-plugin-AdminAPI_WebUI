@@ -1,5 +1,5 @@
 // Upload config files
-package traefik_plugin_waeb2
+package traefik-plugin-AdminAPI_WebUI
 
 import (
 	"archive/zip"

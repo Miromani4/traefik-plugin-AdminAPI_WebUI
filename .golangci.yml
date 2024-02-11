@@ -25,5 +25,5 @@ linters-settings:
       main:
         allow:
           - $gostd
-          - github.com/Miromani4/traefik-plugin-waeb2
+          - github.com/Miromani4/traefik-plugin-AdminAPI_WebUI
 
