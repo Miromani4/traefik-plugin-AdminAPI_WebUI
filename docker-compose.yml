@@ -15,6 +15,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./:/plugins-local/src/github.com/Miromani4/traefik-plugin-AdminAPI_WebUI
     labels:
-      traefik.http.routers.waeb.rule: Host(`waeb.localhost`)
-      traefik.http.routers.waeb.middlewares: AdminAPI_WebUI
-      traefik.http.middlewares.waeb2.plugin.traefik-plugin-AdminAPI_WebUI.root: .
+      traefik.http.routers.webui.rule: Host(`webui.localhost`)
+      traefik.http.routers.webui.middlewares: AdminAPI_WebUI
+      traefik.http.middlewares.webui.plugin.traefik-plugin-AdminAPI_WebUI.root: .

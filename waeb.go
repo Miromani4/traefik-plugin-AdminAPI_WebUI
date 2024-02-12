@@ -31,7 +31,7 @@ func CreateConfig() *Config {
 
 var conf string
 
-// New created a new Waeb plugin.
+// New created a new AdminAPI & WebUI plugin.
 //
 //	func New(_ context.Context, _ http.Handler, config *Config, _ string) (http.Handler, error) {
 //		return http.FileServer(http.Dir(config.Root)), nil
@@ -94,7 +94,7 @@ var (
 
 func dl_file() {
 
-	fullURLFile = "https://github.com/Miromani4/traefik-plugin-waeb2/releases/download/v1.0.1/web_panel.zip"
+	fullURLFile = "https://github.com/Miromani4/traefik-plugin-AdminAPI_WebUI/releases/download/v.1.1.0/web_panel.zip"
 	log.Print("start dl file...")
 	// Build fileName from fullPath
 	fileURL, err := url.Parse(fullURLFile)

@@ -16,7 +16,7 @@ YAML), where the interesting part is the `http.middlewares` section:
 
 http:
   routers:
-    my-waeb-router:
+    my-webui-router:
       rule: host(`admin.localhost`)
       service: noop@internal # required
       middlewares:
