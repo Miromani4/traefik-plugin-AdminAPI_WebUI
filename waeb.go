@@ -2,15 +2,16 @@
 package traefik_plugin_AdminAPI_WebUI
 
 import (
-	"archive/zip"
+	// "archive/zip"
 	"context"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
-	"net/url"
+
+	// "net/url"
 	"os"
-	"path/filepath"
+	// "path/filepath"
 	"strconv"
 	"strings"
 )
@@ -87,96 +88,96 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Successfully Uploaded File\n")
 }
 
-var (
-	fileName    string
-	fullURLFile string
-)
+// var (
+// 	fileName    string
+// 	fullURLFile string
+// )
 
-func dl_file() {
+// func dl_file() {
 
-	fullURLFile = "https://github.com/Miromani4/traefik-plugin-AdminAPI_WebUI/releases/download/v.1.1.0/web_panel.zip"
-	log.Print("start dl file...")
-	// Build fileName from fullPath
-	fileURL, err := url.Parse(fullURLFile)
-	if err != nil {
-		log.Print(err)
-	}
-	path := fileURL.Path
-	segments := strings.Split(path, "/")
-	fileName = segments[len(segments)-1]
+// 	fullURLFile = "https://github.com/Miromani4/traefik-plugin-AdminAPI_WebUI/releases/download/v.1.1.0/web_panel.zip"
+// 	log.Print("start dl file...")
+// 	// Build fileName from fullPath
+// 	fileURL, err := url.Parse(fullURLFile)
+// 	if err != nil {
+// 		log.Print(err)
+// 	}
+// 	path := fileURL.Path
+// 	segments := strings.Split(path, "/")
+// 	fileName = segments[len(segments)-1]
 
-	// Create blank file
-	file, err := os.Create(html_root + fileName)
-	if err != nil {
-		log.Print("File exist!")
-	}
-	client := http.Client{
-		CheckRedirect: func(r *http.Request, via []*http.Request) error {
-			r.URL.Opaque = r.URL.Path
-			return nil
-		},
-	}
-	// Put content on file
-	resp, err := client.Get(fullURLFile)
-	if err != nil {
-		log.Print(err)
-	}
-	defer resp.Body.Close()
+// 	// Create blank file
+// 	file, err := os.Create(html_root + fileName)
+// 	if err != nil {
+// 		log.Print("File exist!")
+// 	}
+// 	client := http.Client{
+// 		CheckRedirect: func(r *http.Request, via []*http.Request) error {
+// 			r.URL.Opaque = r.URL.Path
+// 			return nil
+// 		},
+// 	}
+// 	// Put content on file
+// 	resp, err := client.Get(fullURLFile)
+// 	if err != nil {
+// 		log.Print(err)
+// 	}
+// 	defer resp.Body.Close()
 
-	size, err := io.Copy(file, resp.Body)
-	if err != nil {
-		log.Print(err)
-	}
-	defer file.Close()
+// 	size, err := io.Copy(file, resp.Body)
+// 	if err != nil {
+// 		log.Print(err)
+// 	}
+// 	defer file.Close()
 
-	log.Print("Downloaded a file ", fileName, " with size: ", size)
-	unzip()
-}
-func unzip() {
-	dst := html_root
-	archive, err := zip.OpenReader(html_root + "web_panel.zip")
-	if err != nil {
-		panic(err)
-	}
-	defer archive.Close()
+// 	log.Print("Downloaded a file ", fileName, " with size: ", size)
+// 	unzip()
+// }
+// func unzip() {
+// 	dst := html_root
+// 	archive, err := zip.OpenReader(html_root + "web_panel.zip")
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	defer archive.Close()
 
-	for _, f := range archive.File {
-		filePath := filepath.Join(dst, f.Name)
-		fmt.Println("unzipping file ", filePath)
+// 	for _, f := range archive.File {
+// 		filePath := filepath.Join(dst, f.Name)
+// 		fmt.Println("unzipping file ", filePath)
 
-		if !strings.HasPrefix(filePath, filepath.Clean(dst)+string(os.PathSeparator)) {
-			fmt.Println("invalid file path")
-			return
-		}
-		if f.FileInfo().IsDir() {
-			fmt.Println("creating directory...")
-			os.MkdirAll(filePath, os.ModePerm)
-			continue
-		}
+// 		if !strings.HasPrefix(filePath, filepath.Clean(dst)+string(os.PathSeparator)) {
+// 			fmt.Println("invalid file path")
+// 			return
+// 		}
+// 		if f.FileInfo().IsDir() {
+// 			fmt.Println("creating directory...")
+// 			os.MkdirAll(filePath, os.ModePerm)
+// 			continue
+// 		}
 
-		if err := os.MkdirAll(filepath.Dir(filePath), os.ModePerm); err != nil {
-			panic(err)
-		}
+// 		if err := os.MkdirAll(filepath.Dir(filePath), os.ModePerm); err != nil {
+// 			panic(err)
+// 		}
 
-		dstFile, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
-		if err != nil {
-			panic(err)
-		}
+// 		dstFile, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+// 		if err != nil {
+// 			panic(err)
+// 		}
 
-		fileInArchive, err := f.Open()
-		if err != nil {
-			panic(err)
-		}
+// 		fileInArchive, err := f.Open()
+// 		if err != nil {
+// 			panic(err)
+// 		}
 
-		if _, err := io.Copy(dstFile, fileInArchive); err != nil {
-			panic(err)
-		}
+// 		if _, err := io.Copy(dstFile, fileInArchive); err != nil {
+// 			panic(err)
+// 		}
 
-		dstFile.Close()
-		fileInArchive.Close()
+// 		dstFile.Close()
+// 		fileInArchive.Close()
 
-	}
-}
+// 	}
+// }
 
 func New(_ context.Context, _ http.Handler, config *Config, _ string) (http.Handler, error) {
 	// if _, err := os.Stat(html_root); os.IsNotExist(err) {
