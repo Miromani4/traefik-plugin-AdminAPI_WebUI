@@ -65,11 +65,11 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 
 	defer file.Close()
 	fmt.Printf("Uploaded File: %+v\n", handler.Filename)
-	log.Print("Uploaded File: %+v\n", handler.Filename)
+	log.Printf("Uploaded File: %+v\n", handler.Filename)
 	fmt.Printf("File Size: %+v\n", handler.Size)
-	log.Print("File Size: %+v\n", handler.Size)
+	log.Printf("File Size: %+v\n", handler.Size)
 	fmt.Printf("MIME Header: %+v\n", handler.Header)
-	log.Print("MIME Header: %+v\n", handler.Header)
+	log.Printf("MIME Header: %+v\n", handler.Header)
 
 	// Create file
 	dst, err := os.Create(fmt.Sprintf(conf) + handler.Filename)
