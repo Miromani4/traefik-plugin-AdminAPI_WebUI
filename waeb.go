@@ -179,11 +179,11 @@ func unzip() {
 }
 
 func New(_ context.Context, _ http.Handler, config *Config, _ string) (http.Handler, error) {
-	if _, err := os.Stat(html_root); os.IsNotExist(err) {
-		err := os.MkdirAll(html_root, 0777)
-		log.Print(err)
-		dl_file()
-	}
+	// if _, err := os.Stat(html_root); os.IsNotExist(err) {
+	// 	err := os.MkdirAll(html_root, 0777)
+	// 	log.Print(err)
+	// 	dl_file()
+	// }
 	conf = config.Root
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", root)
