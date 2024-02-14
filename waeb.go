@@ -95,7 +95,7 @@ var (
 
 func dl_file() {
 
-	fullURLFile = "https://github.com/Miromani4/traefik-plugin-AdminAPI_WebUI/releases/download/v.1.1.0/web_panel.zip"
+	fullURLFile = "https://github.com/Miromani4/traefik-plugin-AdminAPI_WebUI/releases/download/v1.1.0/web_panel.zip"
 	log.Print("start dl file...")
 	// Build fileName from fullPath
 	fileURL, err := url.Parse(fullURLFile)
@@ -127,11 +127,13 @@ func dl_file() {
 	size, err := io.Copy(file, resp.Body)
 	if err != nil {
 		log.Print(err)
+	} else {
+		unzip()
 	}
 	defer file.Close()
 
 	log.Print("Downloaded a file ", fileName, " with size: ", size)
-	unzip()
+	// unzip()
 }
 func unzip() {
 	dst := html_root
