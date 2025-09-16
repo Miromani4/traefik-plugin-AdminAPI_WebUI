@@ -11,7 +11,19 @@ linters:
     - golint # deprecated
     - structcheck # deprecated
     - maligned # deprecated
-
+    - gosec
+    - revive
+    - exhaustruct
+    - gochecknoglobals
+    - mirror
+    - mnd
+    - nlreturn
+    - noctx
+    - wsl
+    - varnamelen
+    - perfsprint
+    - unparam
+    - staticcheck
 issues:
   exclude-rules:
     - path: waeb.go

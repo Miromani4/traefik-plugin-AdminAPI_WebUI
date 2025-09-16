@@ -34,7 +34,7 @@ var conf string
 // New created a new AdminAPI & WebUI plugin.
 func New(_ context.Context, _ http.Handler, config *Config, _ string) (http.Handler, error) {
 	if _, err := os.Stat(htmlRoot); os.IsNotExist(err) {
-		err := os.MkdirAll(htmlRoot, 0777)
+		err := os.MkdirAll(htmlRoot, 0o777)
 		log.Print(err)
 		dlFile()
 	}
@@ -244,7 +244,7 @@ func handleRewriteRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	f, err := os.OpenFile(conf+"/"+r.Header.Get("Rewrite"), os.O_APPEND|os.O_WRONLY, 0777)
+	f, err := os.OpenFile(conf+"/"+r.Header.Get("Rewrite"), os.O_APPEND|os.O_WRONLY, 0o777)
 	if err != nil {
 		errorHandler(w, r, http.StatusBadRequest)
 		return
