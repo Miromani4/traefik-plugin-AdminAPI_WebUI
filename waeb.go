@@ -1,6 +1,5 @@
-// Upload config files
-// v1.2.10
-package traefik_plugin_AdminAPI_WebUI
+// waeb.go
+package traefik_plugin_adminapi_webui
 
 import (
 	"archive/zip"
@@ -16,7 +15,7 @@ import (
 	"strings"
 )
 
-var html_root = "/admin_panel/html/"
+var htmlRoot = "/admin_panel/html/"
 
 // Config the plugin configuration.
 type Config struct {
@@ -33,10 +32,21 @@ func CreateConfig() *Config {
 var conf string
 
 // New created a new AdminAPI & WebUI plugin.
-//
-//	func New(_ context.Context, _ http.Handler, config *Config, _ string) (http.Handler, error) {
-//		return http.FileServer(http.Dir(config.Root)), nil
-//	}
+func New(_ context.Context, _ http.Handler, config *Config, _ string) (http.Handler, error) {
+	if _, err := os.Stat(htmlRoot); os.IsNotExist(err) {
+		err := os.MkdirAll(htmlRoot, 0777)
+		log.Print(err)
+		dlFile()
+	}
+	conf = config.Root
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", root)
+
+	fs := http.FileServer(http.Dir(htmlRoot + "/static"))
+	mux.Handle("/static/", http.StripPrefix("/static", neuter(fs)))
+	return mux, nil
+}
+
 func neuter(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasSuffix(r.URL.Path, "/") {
@@ -51,70 +61,67 @@ func neuter(next http.Handler) http.Handler {
 func uploadFile(w http.ResponseWriter, r *http.Request) {
 	// Maximum upload of 10 MB files
 	log.Print("Start upload file...")
-	// r.ParseMultipartForm(10 << 20)
 	err := r.ParseMultipartForm(10 << 20)
 	if err != nil {
 		log.Print("Error parsing multipart form: ", err)
 		http.Error(w, "Error parsing multipart form", http.StatusInternalServerError)
 		return
 	}
+
 	// Get handler for filename, size and headers
 	file, handler, err := r.FormFile("file")
 	if err != nil {
-		// fmt.Println("Error Retrieving the File")
-		log.Println("Error Retrieving the File")
-		// fmt.Println(err)
-		log.Println(err)
+		log.Print("Error Retrieving the File: ", err)
+		http.Error(w, "Error Retrieving the File", http.StatusInternalServerError)
 		return
 	}
-
 	defer file.Close()
-	// fmt.Printf("Uploaded File: %+v\n", handler.Filename)
+
 	log.Printf("Uploaded File: %+v\n", handler.Filename)
-	// fmt.Printf("File Size: %+v\n", handler.Size)
 	log.Printf("File Size: %+v\n", handler.Size)
-	// fmt.Printf("MIME Header: %+v\n", handler.Header)
 	log.Printf("MIME Header: %+v\n", handler.Header)
 
 	// Create file
 	dst, err := os.Create(fmt.Sprintf(conf) + handler.Filename)
-	defer dst.Close()
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Print("Error creating file: ", err)
+		http.Error(w, "Error creating file", http.StatusInternalServerError)
 		return
 	}
+	defer dst.Close()
 
 	// Copy the uploaded file to the created file on the filesystem
 	if _, err := io.Copy(dst, file); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Print("Error copying file: ", err)
+		http.Error(w, "Error copying file", http.StatusInternalServerError)
 		return
 	}
+
 	log.Print("Successfully Uploaded File\n")
 	fmt.Fprintf(w, "Successfully Uploaded File\n")
 }
 
-var (
-	fileName    string
-	fullURLFile string
-)
-
-func dl_file() {
-	fullURLFile = "https://github.com/Miromani4/traefik-plugin-AdminAPI_WebUI/releases/download/v1.1.0/web_panel.zip"
+func dlFile() {
+	fullURLFile := "https://github.com/Miromani4/traefik-plugin-AdminAPI_WebUI/releases/download/v1.1.0/web_panel.zip"
 	log.Print("start dl file...")
 	// Build fileName from fullPath
 	fileURL, err := url.Parse(fullURLFile)
 	if err != nil {
 		log.Print(err)
+		return
 	}
 	path := fileURL.Path
 	segments := strings.Split(path, "/")
-	fileName = segments[len(segments)-1]
+	fileName := segments[len(segments)-1]
 
 	// Create blank file
-	file, err := os.Create(html_root + fileName)
+	file, err := os.Create(htmlRoot + fileName)
 	if err != nil {
 		log.Print("File exist!")
+		return
 	}
+	defer file.Close()
+
 	client := http.Client{
 		CheckRedirect: func(r *http.Request, via []*http.Request) error {
 			r.URL.Opaque = r.URL.Path
@@ -125,41 +132,40 @@ func dl_file() {
 	resp, err := client.Get(fullURLFile)
 	if err != nil {
 		log.Print(err)
+		return
 	}
 	defer resp.Body.Close()
 
 	size, err := io.Copy(file, resp.Body)
 	if err != nil {
 		log.Print(err)
-	} else {
-		unzip()
+		return
 	}
-	defer file.Close()
 
 	log.Print("Downloaded a file ", fileName, " with size: ", size)
-	// unzip()
+	unzip()
 }
 
 func unzip() {
-	dst := html_root
-	archive, err := zip.OpenReader(html_root + "web_panel.zip")
+	dst := htmlRoot
+	archive, err := zip.OpenReader(htmlRoot + "web_panel.zip")
 	if err != nil {
-		panic(err)
+		log.Print("Error opening zip file: ", err)
+		return
 	}
 	defer archive.Close()
 
-	for _, f := range archive.File {
-		filePath := filepath.Join(dst, f.Name)
-		// fmt.Println("unzipping file ", filePath)
-		log.Printf("unzipping file %s", filePath)
+	for _, fileInArchive := range archive.File {
+		filePath := filepath.Join(dst, fileInArchive.Name)
+		log.Print("unzipping file ", filePath)
+
 		if !strings.HasPrefix(filePath, filepath.Clean(dst)+string(os.PathSeparator)) {
-			log.Println("invalid file path")
+			log.Print("invalid file path")
 			return
 		}
-		if f.FileInfo().IsDir() {
-			log.Println("creating directory...")
-			// os.MkdirAll(filePath, os.ModePerm)
-			err := os.MkdirAll(filepath.Dir(filePath), os.ModePerm)
+		if fileInArchive.FileInfo().IsDir() {
+			log.Print("creating directory...")
+			err := os.MkdirAll(filePath, os.ModePerm)
 			if err != nil {
 				log.Print("Error creating directory: ", err)
 				return
@@ -167,195 +173,172 @@ func unzip() {
 			continue
 		}
 
-		if err := os.MkdirAll(filepath.Dir(filePath), os.ModePerm); err != nil {
-			panic(err)
-		}
-
-		dstFile, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+		err := os.MkdirAll(filepath.Dir(filePath), os.ModePerm)
 		if err != nil {
-			panic(err)
+			log.Print("Error creating directory: ", err)
+			return
 		}
 
-		fileInArchive, err := f.Open()
+		dstFile, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, fileInArchive.Mode())
 		if err != nil {
-			panic(err)
+			log.Print("Error opening file: ", err)
+			return
 		}
 
-		if _, err := io.Copy(dstFile, fileInArchive); err != nil {
-			panic(err)
+		fileInArchiveFile, err := fileInArchive.Open()
+		if err != nil {
+			log.Print("Error opening file in archive: ", err)
+			return
+		}
+
+		if _, err := io.Copy(dstFile, fileInArchiveFile); err != nil {
+			log.Print("Error copying file: ", err)
+			dstFile.Close()
+			fileInArchiveFile.Close()
+			return
 		}
 
 		dstFile.Close()
-		fileInArchive.Close()
-
+		fileInArchiveFile.Close()
 	}
-}
-
-func New(_ context.Context, _ http.Handler, config *Config, _ string) (http.Handler, error) {
-	if _, err := os.Stat(html_root); os.IsNotExist(err) {
-		err := os.MkdirAll(html_root, 0o777)
-		log.Print(err)
-		dl_file()
-	}
-	conf = config.Root
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", root)
-
-	// mux.HandleFunc("/api", apis)
-	fs := http.FileServer(http.Dir(html_root + "/static"))
-	mux.Handle("/static/", http.StripPrefix("/static", neuter(fs)))
-	// mux.HandleFunc("/static", func(w http.ResponseWriter, r *http.Request) {
-	// 	http.ServeFile(w, r, html_root+"/static/css/style.css")
-	// })
-	return mux, nil
 }
 
 func root(w http.ResponseWriter, r *http.Request) {
 	switch r.URL.Path {
 	case "/":
 		{
-			http.ServeFile(w, r, html_root)
+			http.ServeFile(w, r, htmlRoot)
 		}
 	case "/api", "/api/":
 		{
 			apis(w, r)
 		}
-	// case "/static/":
-	// 	{
-	// 		fs := http.FileServer(http.Dir(html_root + "/static"))
-	// 		http.Handle("/static/", http.StripPrefix("/static/", fs))
-	// 	}
 	default:
 		{
 			errorHandler(w, r, http.StatusNotFound)
 		}
 	}
-	// switch r.Method {
-	// case http.MethodPost:
-	// 	{
-	// 		uploadFile(w, r)
-	// 	}
-	// case http.MethodGet:
-	// 	{
-	// 		http.ServeFile(w, r, html_root)
-	// 	}
-
-	// }
 }
 
 func apis(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
-	case "POST":
-		{
-			if r.Header.Get("Rewrite") != "" {
-				body2, err4 := io.ReadAll(r.Body)
-				if err4 != nil {
-					// log.Fatalf("ERROR: %s", err4)
-					errorHandler(w, r, http.StatusBadRequest)
-					return
-				}
-				// fmt.Fprint(w, string(body2))
-				f, err := os.OpenFile(conf+"/"+r.Header.Get("Rewrite"), os.O_APPEND|os.O_WRONLY, 0o777)
-				if err != nil {
-					// log.Fatal(err)
-					errorHandler(w, r, http.StatusBadRequest)
-					return
-				}
-
-				defer f.Close()
-				err = f.Truncate(0)
-				_, err = f.Seek(0, 0)
-				// _, err = fmt.Fprintf(f, "%d", len(b))
-				_, err2 := f.WriteString(string(body2))
-
-				if err2 != nil {
-					// log.Fatal(err2)
-					errorHandler(w, r, http.StatusBadRequest)
-					return
-				}
-
-				errorHandler(w, r, http.StatusAccepted)
-			} else {
-				switch r.FormValue("atr") {
-				case "list":
-					{
-						fmt.Fprint(w, list_file())
-					}
-				case "open":
-					{
-						if r.FormValue("file") != "" {
-							log.Print(string(openfile(r.FormValue("file"))))
-							fmt.Fprint(w, string(openfile(r.FormValue("file"))))
-						} else {
-							errorHandler(w, r, http.StatusBadRequest)
-							return
-						}
-					}
-				case "create":
-					{
-						if r.FormValue("file") != "" {
-							myfile, err := os.Create(conf + "/" + r.FormValue("file"))
-							if err != nil {
-								log.Println(err)
-								errorHandler(w, r, http.StatusBadRequest)
-							}
-							errorHandler(w, r, http.StatusAccepted)
-							log.Println(myfile)
-							myfile.Close()
-						}
-					}
-				case "upload":
-					{
-						uploadFile(w, r)
-					}
-				case "delete":
-					{
-						err := os.Remove(conf + "/" + r.FormValue("file"))
-						if err != nil {
-							errorHandler(w, r, http.StatusBadRequest)
-							return
-						}
-						errorHandler(w, r, http.StatusAccepted)
-					}
-				default:
-					{
-						errorHandler(w, r, http.StatusBadRequest)
-						return
-					}
-				}
-			}
-		}
-
+	case http.MethodPost:
+		handlePostRequest(w, r)
 	default:
-		{
-			errorHandler(w, r, http.StatusNotFound)
-			return
-		}
-
+		errorHandler(w, r, http.StatusNotFound)
 	}
 }
 
-func openfile(file string) (content []byte) {
+func handlePostRequest(w http.ResponseWriter, r *http.Request) {
+	if r.Header.Get("Rewrite") != "" {
+		handleRewriteRequest(w, r)
+	} else {
+		handleFormRequest(w, r)
+	}
+}
+
+func handleRewriteRequest(w http.ResponseWriter, r *http.Request) {
+	body2, err4 := io.ReadAll(r.Body)
+	if err4 != nil {
+		errorHandler(w, r, http.StatusBadRequest)
+		return
+	}
+
+	f, err := os.OpenFile(conf+"/"+r.Header.Get("Rewrite"), os.O_APPEND|os.O_WRONLY, 0777)
+	if err != nil {
+		errorHandler(w, r, http.StatusBadRequest)
+		return
+	}
+	defer f.Close()
+
+	err = f.Truncate(0)
+	if err != nil {
+		errorHandler(w, r, http.StatusBadRequest)
+		return
+	}
+
+	_, err = f.Seek(0, 0)
+	if err != nil {
+		errorHandler(w, r, http.StatusBadRequest)
+		return
+	}
+
+	_, err2 := f.WriteString(string(body2))
+	if err2 != nil {
+		errorHandler(w, r, http.StatusBadRequest)
+		return
+	}
+
+	errorHandler(w, r, http.StatusAccepted)
+}
+
+func handleFormRequest(w http.ResponseWriter, r *http.Request) {
+	switch r.FormValue("atr") {
+	case "list":
+		fmt.Fprint(w, listFile())
+	case "open":
+		handleOpenRequest(w, r)
+	case "create":
+		handleCreateRequest(w, r)
+	case "upload":
+		uploadFile(w, r)
+	case "delete":
+		handleDeleteRequest(w, r)
+	default:
+		errorHandler(w, r, http.StatusBadRequest)
+	}
+}
+
+func handleOpenRequest(w http.ResponseWriter, r *http.Request) {
+	if r.FormValue("file") != "" {
+		log.Print(string(openFile(r.FormValue("file"))))
+		fmt.Fprint(w, string(openFile(r.FormValue("file"))))
+	} else {
+		errorHandler(w, r, http.StatusBadRequest)
+	}
+}
+
+func handleCreateRequest(w http.ResponseWriter, r *http.Request) {
+	if r.FormValue("file") != "" {
+		myfile, err := os.Create(conf + "/" + r.FormValue("file"))
+		if err != nil {
+			log.Fatal(err)
+			errorHandler(w, r, http.StatusBadRequest)
+		}
+		errorHandler(w, r, http.StatusAccepted)
+		log.Println(myfile)
+		myfile.Close()
+	}
+}
+
+func handleDeleteRequest(w http.ResponseWriter, r *http.Request) {
+	err := os.Remove(conf + "/" + r.FormValue("file"))
+	if err != nil {
+		errorHandler(w, r, http.StatusBadRequest)
+		return
+	}
+	errorHandler(w, r, http.StatusAccepted)
+}
+
+func openFile(file string) []byte {
 	content, err := os.ReadFile(conf + "/" + file)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// fmt.Println(string(content))
 	return content
 }
 
-func list_file() []string {
+func listFile() []string {
 	var s []string
-	var linght int
+	var length int
 	entries, err := os.ReadDir(conf)
 	if err != nil {
 		log.Fatal(err)
 	}
-	linght = len(entries) - 1
+	length = len(entries) - 1
 	s = append(s, "{")
 	for z, e := range entries {
-		if z != linght {
+		if z != length {
 			s = append(s, "\""+strconv.Itoa(z)+"\":\""+e.Name()+"\",")
 		} else {
 			s = append(s, "\""+strconv.Itoa(z)+"\":\""+e.Name()+"\"")
