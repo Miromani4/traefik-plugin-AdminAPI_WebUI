@@ -50,7 +50,12 @@ func neuter(next http.Handler) http.Handler {
 func uploadFile(w http.ResponseWriter, r *http.Request) {
 	// Maximum upload of 10 MB files
 	log.Print("Start upload file...")
-	r.ParseMultipartForm(10 << 20)
+	err := r.ParseMultipartForm(10 << 20)
+	if err != nil {
+		log.Print("Error parsing multipart form: ", err)
+		http.Error(w, "Error parsing multipart form", http.StatusInternalServerError)
+		return
+	}
 
 	// Get handler for filename, size and headers
 	file, handler, err := r.FormFile("file")
@@ -71,13 +76,13 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	log.Printf("MIME Header: %+v\n", handler.Header)
 
 	// Create file
-	dst, err := os.Create(fmt.Sprintf(conf) + handler.Filename)
-	defer dst.Close()
+	dst, err := os.Create(conf + handler.Filename)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Print("Error creating file: ", err)
+		http.Error(w, "Error creating file", http.StatusInternalServerError)
 		return
 	}
-
+	defer dst.Close()
 	// Copy the uploaded file to the created file on the filesystem
 	if _, err := io.Copy(dst, file); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -152,7 +157,11 @@ func unzip() {
 		}
 		if f.FileInfo().IsDir() {
 			log.Println("creating directory...")
-			os.MkdirAll(filePath, os.ModePerm)
+			err := os.MkdirAll(filePath, os.ModePerm)
+			if err != nil {
+				log.Print("Error creating directory: ", err)
+				return
+			}
 			continue
 		}
 
@@ -253,8 +262,16 @@ func apis(w http.ResponseWriter, r *http.Request) {
 
 				defer f.Close()
 				err = f.Truncate(0)
+				if err != nil {
+					errorHandler(w, r, http.StatusBadRequest)
+					return
+				}
 				_, err = f.Seek(0, 0)
 				// _, err = fmt.Fprintf(f, "%d", len(b))
+				if err != nil {
+					errorHandler(w, r, http.StatusBadRequest)
+					return
+				}
 				_, err2 := f.WriteString(string(body2))
 
 				if err2 != nil {
