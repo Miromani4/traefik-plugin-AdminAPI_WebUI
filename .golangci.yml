@@ -16,12 +16,10 @@ linters:
     - exhaustruct
     - gochecknoglobals
     - mirror
-    - mnd
     - nlreturn
     - noctx
     - wsl
     - varnamelen
-    - perfsprint
     - unparam
     - staticcheck
 issues:
