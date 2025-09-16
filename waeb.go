@@ -285,14 +285,14 @@ func apis(w http.ResponseWriter, r *http.Request) {
 				switch r.FormValue("atr") {
 				case "list":
 					{
-						// fmt.Fprint(w, list_file())
+						fmt.Fprint(w, list_file())
 						log.Print(list_file())
 					}
 				case "open":
 					{
 						if r.FormValue("file") != "" {
 							log.Print(string(openfile(r.FormValue("file"))))
-							// fmt.Fprint(w, string(openfile(r.FormValue("file"))))
+							fmt.Fprint(w, string(openfile(r.FormValue("file"))))
 						} else {
 							errorHandler(w, r, http.StatusBadRequest)
 							return
