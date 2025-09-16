@@ -52,24 +52,29 @@ func neuter(next http.Handler) http.Handler {
 func uploadFile(w http.ResponseWriter, r *http.Request) {
 	// Maximum upload of 10 MB files
 	log.Print("Start upload file...")
-	r.ParseMultipartForm(10 << 20)
-
+	// r.ParseMultipartForm(10 << 20)
+	err := r.ParseMultipartForm(10 << 20)
+	if err != nil {
+		log.Print("Error parsing multipart form: ", err)
+		http.Error(w, "Error parsing multipart form", http.StatusInternalServerError)
+		return
+	}
 	// Get handler for filename, size and headers
 	file, handler, err := r.FormFile("file")
 	if err != nil {
-		fmt.Println("Error Retrieving the File")
-		log.Print("Error Retrieving the File")
-		fmt.Println(err)
-		log.Print(err)
+		// fmt.Println("Error Retrieving the File")
+		log.Println("Error Retrieving the File")
+		// fmt.Println(err)
+		log.Println(err)
 		return
 	}
 
 	defer file.Close()
-	fmt.Printf("Uploaded File: %+v\n", handler.Filename)
+	// fmt.Printf("Uploaded File: %+v\n", handler.Filename)
 	log.Printf("Uploaded File: %+v\n", handler.Filename)
-	fmt.Printf("File Size: %+v\n", handler.Size)
+	// fmt.Printf("File Size: %+v\n", handler.Size)
 	log.Printf("File Size: %+v\n", handler.Size)
-	fmt.Printf("MIME Header: %+v\n", handler.Header)
+	// fmt.Printf("MIME Header: %+v\n", handler.Header)
 	log.Printf("MIME Header: %+v\n", handler.Header)
 
 	// Create file
@@ -146,15 +151,20 @@ func unzip() {
 
 	for _, f := range archive.File {
 		filePath := filepath.Join(dst, f.Name)
-		fmt.Println("unzipping file ", filePath)
-
+		// fmt.Println("unzipping file ", filePath)
+		log.Printf("unzipping file %s", filePath)
 		if !strings.HasPrefix(filePath, filepath.Clean(dst)+string(os.PathSeparator)) {
 			fmt.Println("invalid file path")
 			return
 		}
 		if f.FileInfo().IsDir() {
 			fmt.Println("creating directory...")
-			os.MkdirAll(filePath, os.ModePerm)
+			// os.MkdirAll(filePath, os.ModePerm)
+			err := os.MkdirAll(filepath.Dir(filePath), os.ModePerm)
+			if err != nil {
+				log.Print("Error creating directory: ", err)
+				return
+			}
 			continue
 		}
 
@@ -240,14 +250,14 @@ func apis(w http.ResponseWriter, r *http.Request) {
 			if r.Header.Get("Rewrite") != "" {
 				body2, err4 := io.ReadAll(r.Body)
 				if err4 != nil {
-					//log.Fatalf("ERROR: %s", err4)
+					// log.Fatalf("ERROR: %s", err4)
 					errorHandler(w, r, http.StatusBadRequest)
 					return
 				}
-				//fmt.Fprint(w, string(body2))
+				// fmt.Fprint(w, string(body2))
 				f, err := os.OpenFile(conf+"/"+r.Header.Get("Rewrite"), os.O_APPEND|os.O_WRONLY, 0777)
 				if err != nil {
-					//log.Fatal(err)
+					// log.Fatal(err)
 					errorHandler(w, r, http.StatusBadRequest)
 					return
 				}
@@ -259,7 +269,7 @@ func apis(w http.ResponseWriter, r *http.Request) {
 				_, err2 := f.WriteString(string(body2))
 
 				if err2 != nil {
-					//log.Fatal(err2)
+					// log.Fatal(err2)
 					errorHandler(w, r, http.StatusBadRequest)
 					return
 				}
@@ -335,7 +345,7 @@ func openfile(file string) (content []byte) {
 		log.Fatal(err)
 	}
 
-	//fmt.Println(string(content))
+	// fmt.Println(string(content))
 	return content
 }
 
