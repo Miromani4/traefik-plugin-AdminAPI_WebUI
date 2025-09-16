@@ -1,4 +1,5 @@
 // Upload config files
+// v1.2.6
 package traefik_plugin_AdminAPI_WebUI
 
 import (
