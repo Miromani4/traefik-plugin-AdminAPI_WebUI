@@ -22,6 +22,7 @@ linters:
     - varnamelen
     - unparam
     - staticcheck
+    - gomnd
 issues:
   exclude-rules:
     - path: waeb.go
