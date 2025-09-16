@@ -56,19 +56,19 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	// Get handler for filename, size and headers
 	file, handler, err := r.FormFile("file")
 	if err != nil {
-		fmt.Println("Error Retrieving the File")
+		// fmt.Println("Error Retrieving the File")
 		log.Print("Error Retrieving the File")
-		fmt.Println(err)
+		// fmt.Println(err)
 		log.Print(err)
 		return
 	}
 
 	defer file.Close()
-	fmt.Printf("Uploaded File: %+v\n", handler.Filename)
+	// fmt.Printf("Uploaded File: %+v\n", handler.Filename)
 	log.Printf("Uploaded File: %+v\n", handler.Filename)
-	fmt.Printf("File Size: %+v\n", handler.Size)
+	// fmt.Printf("File Size: %+v\n", handler.Size)
 	log.Printf("File Size: %+v\n", handler.Size)
-	fmt.Printf("MIME Header: %+v\n", handler.Header)
+	// fmt.Printf("MIME Header: %+v\n", handler.Header)
 	log.Printf("MIME Header: %+v\n", handler.Header)
 
 	// Create file
@@ -85,7 +85,7 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	log.Print("Successfully Uploaded File\n")
-	fmt.Fprintf(w, "Successfully Uploaded File\n")
+	// fmt.Fprintf(w, "Successfully Uploaded File\n")
 }
 
 var (
@@ -145,14 +145,14 @@ func unzip() {
 
 	for _, f := range archive.File {
 		filePath := filepath.Join(dst, f.Name)
-		fmt.Println("unzipping file ", filePath)
+		log.Println("unzipping file ", filePath)
 
 		if !strings.HasPrefix(filePath, filepath.Clean(dst)+string(os.PathSeparator)) {
-			fmt.Println("invalid file path")
+			log.Println("invalid file path")
 			return
 		}
 		if f.FileInfo().IsDir() {
-			fmt.Println("creating directory...")
+			log.Println("creating directory...")
 			os.MkdirAll(filePath, os.ModePerm)
 			continue
 		}
@@ -246,7 +246,7 @@ func apis(w http.ResponseWriter, r *http.Request) {
 				//fmt.Fprint(w, string(body2))
 				f, err := os.OpenFile(conf+"/"+r.Header.Get("Rewrite"), os.O_APPEND|os.O_WRONLY, 0777)
 				if err != nil {
-					//log.Fatal(err)
+					// log.Fatal(err)
 					errorHandler(w, r, http.StatusBadRequest)
 					return
 				}
@@ -258,7 +258,7 @@ func apis(w http.ResponseWriter, r *http.Request) {
 				_, err2 := f.WriteString(string(body2))
 
 				if err2 != nil {
-					//log.Fatal(err2)
+					// log.Fatal(err2)
 					errorHandler(w, r, http.StatusBadRequest)
 					return
 				}
@@ -268,13 +268,14 @@ func apis(w http.ResponseWriter, r *http.Request) {
 				switch r.FormValue("atr") {
 				case "list":
 					{
-						fmt.Fprint(w, list_file())
+						// fmt.Fprint(w, list_file())
+						log.Print(list_file())
 					}
 				case "open":
 					{
 						if r.FormValue("file") != "" {
 							log.Print(string(openfile(r.FormValue("file"))))
-							fmt.Fprint(w, string(openfile(r.FormValue("file"))))
+							// fmt.Fprint(w, string(openfile(r.FormValue("file"))))
 						} else {
 							errorHandler(w, r, http.StatusBadRequest)
 							return
@@ -334,7 +335,7 @@ func openfile(file string) (content []byte) {
 		log.Fatal(err)
 	}
 
-	//fmt.Println(string(content))
+	// fmt.Println(string(content))
 	return content
 }
 
@@ -364,6 +365,7 @@ func errorHandler(w http.ResponseWriter, r *http.Request, status int) {
 	case http.StatusNotFound:
 		{
 			fmt.Fprint(w, "<h1>Page not found 404</h1>")
+
 		}
 	case http.StatusBadRequest:
 		{

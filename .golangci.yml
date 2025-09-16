@@ -23,6 +23,8 @@ linters:
     - unparam
     - staticcheck
     - gomnd
+    - forbidigo
+    - errcheck
 issues:
   exclude-rules:
     - path: waeb.go
