@@ -9,7 +9,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-
 	"net/url"
 	"os"
 	"path/filepath"
@@ -100,7 +99,6 @@ var (
 )
 
 func dl_file() {
-
 	fullURLFile = "https://github.com/Miromani4/traefik-plugin-AdminAPI_WebUI/releases/download/v1.1.0/web_panel.zip"
 	log.Print("start dl file...")
 	// Build fileName from fullPath
@@ -141,6 +139,7 @@ func dl_file() {
 	log.Print("Downloaded a file ", fileName, " with size: ", size)
 	// unzip()
 }
+
 func unzip() {
 	dst := html_root
 	archive, err := zip.OpenReader(html_root + "web_panel.zip")
@@ -154,11 +153,11 @@ func unzip() {
 		// fmt.Println("unzipping file ", filePath)
 		log.Printf("unzipping file %s", filePath)
 		if !strings.HasPrefix(filePath, filepath.Clean(dst)+string(os.PathSeparator)) {
-			fmt.Println("invalid file path")
+			log.Println("invalid file path")
 			return
 		}
 		if f.FileInfo().IsDir() {
-			fmt.Println("creating directory...")
+			log.Println("creating directory...")
 			// os.MkdirAll(filePath, os.ModePerm)
 			err := os.MkdirAll(filepath.Dir(filePath), os.ModePerm)
 			if err != nil {
@@ -194,7 +193,7 @@ func unzip() {
 
 func New(_ context.Context, _ http.Handler, config *Config, _ string) (http.Handler, error) {
 	if _, err := os.Stat(html_root); os.IsNotExist(err) {
-		err := os.MkdirAll(html_root, 0777)
+		err := os.MkdirAll(html_root, 0o777)
 		log.Print(err)
 		dl_file()
 	}
@@ -210,6 +209,7 @@ func New(_ context.Context, _ http.Handler, config *Config, _ string) (http.Hand
 	// })
 	return mux, nil
 }
+
 func root(w http.ResponseWriter, r *http.Request) {
 	switch r.URL.Path {
 	case "/":
@@ -255,7 +255,7 @@ func apis(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 				// fmt.Fprint(w, string(body2))
-				f, err := os.OpenFile(conf+"/"+r.Header.Get("Rewrite"), os.O_APPEND|os.O_WRONLY, 0777)
+				f, err := os.OpenFile(conf+"/"+r.Header.Get("Rewrite"), os.O_APPEND|os.O_WRONLY, 0o777)
 				if err != nil {
 					// log.Fatal(err)
 					errorHandler(w, r, http.StatusBadRequest)
@@ -290,14 +290,13 @@ func apis(w http.ResponseWriter, r *http.Request) {
 							errorHandler(w, r, http.StatusBadRequest)
 							return
 						}
-
 					}
 				case "create":
 					{
 						if r.FormValue("file") != "" {
 							myfile, err := os.Create(conf + "/" + r.FormValue("file"))
 							if err != nil {
-								log.Fatal(err)
+								log.Println(err)
 								errorHandler(w, r, http.StatusBadRequest)
 							}
 							errorHandler(w, r, http.StatusAccepted)
@@ -308,7 +307,6 @@ func apis(w http.ResponseWriter, r *http.Request) {
 				case "upload":
 					{
 						uploadFile(w, r)
-
 					}
 				case "delete":
 					{
@@ -335,12 +333,10 @@ func apis(w http.ResponseWriter, r *http.Request) {
 		}
 
 	}
-
 }
 
 func openfile(file string) (content []byte) {
 	content, err := os.ReadFile(conf + "/" + file)
-
 	if err != nil {
 		log.Fatal(err)
 	}
