@@ -98,7 +98,7 @@ var (
 )
 
 func dl_file() {
-	fullURLFile = "https://github.com/Miromani4/traefik-plugin-AdminAPI_WebUI/releases/download/v1.1.0/web_panel.zip"
+	fullURLFile = "https://github.com/Miromani4/traefik-plugin-AdminAPI_WebUI/releases/download/v1.1.0/web_panel_v2.0.zip"
 	log.Print("start dl file...")
 	// Build fileName from fullPath
 	fileURL, err := url.Parse(fullURLFile)
@@ -248,39 +248,46 @@ func apis(w http.ResponseWriter, r *http.Request) {
 			if r.Header.Get("Rewrite") != "" {
 				body2, err4 := io.ReadAll(r.Body)
 				if err4 != nil {
-					// log.Fatalf("ERROR: %s", err4)
-					errorHandler(w, r, http.StatusBadRequest)
+					w.WriteHeader(http.StatusBadRequest)
+					w.Header().Set("Content-Type", "application/json")
+					fmt.Fprint(w, "{\"status\":\"Error reading request body\"}")
 					return
 				}
-				// fmt.Fprint(w, string(body2))
 				f, err := os.OpenFile(conf+"/"+r.Header.Get("Rewrite"), os.O_APPEND|os.O_WRONLY, 0o777)
 				if err != nil {
-					// log.Fatal(err)
-					errorHandler(w, r, http.StatusBadRequest)
+					w.WriteHeader(http.StatusBadRequest)
+					w.Header().Set("Content-Type", "application/json")
+					fmt.Fprint(w, "{\"status\":\"Error opening file\"}")
 					return
 				}
 
 				defer f.Close()
 				err = f.Truncate(0)
 				if err != nil {
-					errorHandler(w, r, http.StatusBadRequest)
+					w.WriteHeader(http.StatusBadRequest)
+					w.Header().Set("Content-Type", "application/json")
+					fmt.Fprint(w, "{\"status\":\"Error truncating file\"}")
 					return
 				}
 				_, err = f.Seek(0, 0)
-				// _, err = fmt.Fprintf(f, "%d", len(b))
 				if err != nil {
-					errorHandler(w, r, http.StatusBadRequest)
+					w.WriteHeader(http.StatusBadRequest)
+					w.Header().Set("Content-Type", "application/json")
+					fmt.Fprint(w, "{\"status\":\"Error seeking in file\"}")
 					return
 				}
 				_, err2 := f.WriteString(string(body2))
 
 				if err2 != nil {
-					// log.Fatal(err2)
-					errorHandler(w, r, http.StatusBadRequest)
+					w.WriteHeader(http.StatusBadRequest)
+					w.Header().Set("Content-Type", "application/json")
+					fmt.Fprint(w, "{\"status\":\"Error writing to file\"}")
 					return
 				}
 
-				errorHandler(w, r, http.StatusAccepted)
+				w.WriteHeader(http.StatusAccepted)
+				w.Header().Set("Content-Type", "application/json")
+				fmt.Fprint(w, "{\"status\":\"File rewritten successfully\"}")
 			} else {
 				switch r.FormValue("atr") {
 				case "list":
@@ -294,19 +301,31 @@ func apis(w http.ResponseWriter, r *http.Request) {
 							log.Print(string(openfile(r.FormValue("file"))))
 							fmt.Fprint(w, string(openfile(r.FormValue("file"))))
 						} else {
-							errorHandler(w, r, http.StatusBadRequest)
+							w.WriteHeader(http.StatusBadRequest)
+							w.Header().Set("Content-Type", "application/json")
+							fmt.Fprint(w, "{\"status\":\"Can not open file...\"}")
 							return
 						}
 					}
 				case "create":
 					{
 						if r.FormValue("file") != "" {
+							if _, err := os.Stat(conf + "/" + r.FormValue("file")); err == nil {
+								w.WriteHeader(http.StatusBadRequest)
+								w.Header().Set("Content-Type", "application/json")
+								fmt.Fprint(w, "{\"status\":\"Duplicate file\"}")
+								return
+							}
 							myfile, err := os.Create(conf + "/" + r.FormValue("file"))
 							if err != nil {
 								log.Fatal(err)
-								errorHandler(w, r, http.StatusBadRequest)
+								w.WriteHeader(http.StatusBadRequest)
+								w.Header().Set("Content-Type", "application/json")
+								fmt.Fprint(w, "{\"status\":\"Can't create file\"}")
 							}
-							errorHandler(w, r, http.StatusAccepted)
+							w.WriteHeader(http.StatusAccepted)
+							w.Header().Set("Content-Type", "application/json")
+							fmt.Fprint(w, "{\"status\":\"created\"}")
 							log.Println(myfile)
 							myfile.Close()
 						}
@@ -319,14 +338,20 @@ func apis(w http.ResponseWriter, r *http.Request) {
 					{
 						err := os.Remove(conf + "/" + r.FormValue("file"))
 						if err != nil {
-							errorHandler(w, r, http.StatusBadRequest)
+							w.WriteHeader(http.StatusBadRequest)
+							w.Header().Set("Content-Type", "application/json")
+							fmt.Fprint(w, "{\"status\":\"File not found...\"}")
 							return
 						}
-						errorHandler(w, r, http.StatusAccepted)
+						w.WriteHeader(http.StatusAccepted)
+						w.Header().Set("Content-Type", "application/json")
+						fmt.Fprint(w, "{\"status\":\"Deleted file...\"}")
 					}
 				default:
 					{
-						errorHandler(w, r, http.StatusBadRequest)
+						w.WriteHeader(http.StatusBadRequest)
+						w.Header().Set("Content-Type", "application/json")
+						fmt.Fprint(w, "{\"status\":\"Unknown request\"}")
 						return
 					}
 				}
