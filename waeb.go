@@ -16,6 +16,7 @@ import (
 )
 
 var html_root = "/admin_panel/html/"
+var zip_file = "web_panel_v2.0.zip"
 
 // Config the plugin configuration.
 type Config struct {
@@ -98,7 +99,7 @@ var (
 )
 
 func dl_file() {
-	fullURLFile = "https://github.com/Miromani4/traefik-plugin-AdminAPI_WebUI/releases/download/v1.1.0/web_panel_v2.0.zip"
+	fullURLFile = "https://github.com/Miromani4/traefik-plugin-AdminAPI_WebUI/releases/download/v1.1.0/" + zip_file
 	log.Print("start dl file...")
 	// Build fileName from fullPath
 	fileURL, err := url.Parse(fullURLFile)
@@ -141,7 +142,7 @@ func dl_file() {
 
 func unzip() {
 	dst := html_root
-	archive, err := zip.OpenReader(html_root + "web_panel.zip")
+	archive, err := zip.OpenReader(html_root + zip_file)
 	if err != nil {
 		panic(err)
 	}
