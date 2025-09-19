@@ -1,15 +1,3 @@
-#displayName: AdminAPI & WebUI
-#type: middleware
-
-# import: github.com/Miromani4/traefik-plugin-AdminAPI_WebUI
-
-# summary: 'Adds admin API and web interface for creating and editing dynamic files, configuring Traefik!'
-
-# iconPath: ./docs/img/logo.png
-
-# testData:
-#   root: /tmp/
-
 displayName: AdminAPI_WebUI
 type: middleware
 
