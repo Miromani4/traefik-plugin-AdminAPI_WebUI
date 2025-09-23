@@ -1,0 +1,15 @@
+http:
+  routers:
+    admin-ui-router:
+      rule: "Host(`admin.localhost`)"
+      service: noop@internal  # Required placeholder service
+      middlewares:
+        - traefik_plugin_AdminAPI_WebUI
+      tls:
+        {}  # Optional: enable TLS if needed
+
+  middlewares:
+    traefik_plugin_AdminAPI_WebUI:
+      plugin:
+        traefik_plugin_AdminAPI_WebUI:
+          root: "/tmp/"  # Path to configuration directory

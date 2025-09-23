@@ -1,0 +1,44 @@
+version: '3.2'
+
+services:
+  traefik:
+    image: traefik:v3.2
+    container_name: traefik
+    command:
+      - --log.level=DEBUG
+      - --api.insecure=true
+      - --providers.docker
+      - --experimental.plugins.traefik_plugin_AdminAPI_WebUI.moduleName=github.com/Miromani4/traefik-plugin-AdminAPI_WebUI # name of the plugin
+      - --experimental.plugins.traefik_plugin_AdminAPI_WebUI.version=v1.3.0 # version of the plugin, use latest version
+      - --entrypoints.http.address=:80
+      - --entrypoints.http.proxyProtocol.insecure=false
+      - --entrypoints.http.proxyProtocol.trustedIPs=0.0.0.0/0
+      - --entrypoints.http.forwardedHeaders.insecure=false
+      - --entrypoints.http.forwardedHeaders.trustedIPs=0.0.0.0/0
+      - --entrypoints.https.address=:443
+      - --entrypoints.https.proxyProtocol.insecure=false
+      - --entrypoints.https.proxyProtocol.trustedIPs=0.0.0.0/0
+      - --entrypoints.https.forwardedHeaders.insecure=false
+      - --entrypoints.https.forwardedHeaders.trustedIPs=0.0.0.0/0
+      - --certificatesResolvers.letsencrypt.acme.email=admin@example.com
+      - --certificatesResolvers.letsencrypt.acme.storage=/etc/traefik/acme/acme.json
+      - --certificatesResolvers.letsencrypt.acme.tlsChallenge=true
+      - --providers.file.directory=/tmp/ # Path to your dynamic configuration files
+      - --providers.file.watch=true # Watch for changes in the dynamic configuration files
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./tmp:/tmp/ # Local dynamic file storage
+      - acme:/etc/traefik/acme
+    networks:
+      - traefik_network
+
+volumes:
+  acme:
+
+networks:
+  traefik_network:
+    driver: bridge
