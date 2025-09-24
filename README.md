@@ -88,7 +88,7 @@ This plugin is ideal for DevOps and platform engineering teams seeking to automa
 
 ### Interface Overview
 
-![Screenshot 1](docs/img/admin_panel.png)
+![Screenshot 1](https://github.com/Miromani4/traefik-plugin-AdminAPI_WebUI/blob/main/docs%2Fimg%2Fadmin_panel.png)
 
 #### YAML Structure Validation & Error Highlighting
 
