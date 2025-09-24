@@ -92,7 +92,7 @@ This plugin is ideal for DevOps and platform engineering teams seeking to automa
 
 #### YAML Structure Validation & Error Highlighting
 
-![Screenshot 2](docs/img/admin_panel_error.png)
+![Screenshot 2](https://github.com/Miromani4/traefik-plugin-AdminAPI_WebUI/blob/main/docs%2Fimg%2Fadmin_panel_error.png)
 
 #### Keyboard Shortcuts
 
